@@ -8,7 +8,7 @@
 /* This is required for compatibility with Python 2. */
 #if PY_MAJOR_VERSION >= 3
 	#include <bytesobject.h>
-	#define y "y"
+	#define y "s"
 #else
 	#define PyBytes_FromStringAndSize PyString_FromStringAndSize
 	#define y "t"
@@ -47,6 +47,7 @@ makeExt4Fs(PyObject *self, PyObject *args)
     int sparse  =  (int)mode == 1 ? 1: 0;
     int gzip    =  (int)mode == 2 ? 1: 0;
     int android =  mountpoint[0] != '\0'? 1: 0;
+    if (directorylen == 0) directory = NULL;
 
 
     printf("ANDROID: %i, GZIP: %i, SPARSED: %i", android, gzip, sparse);
@@ -75,7 +76,7 @@ ext4_functions[] = {
     };
 
     PyObject *
-    PyInitext4fs(void)
+    PyInit_ext4fs(void)
     {
         return PyModule_Create(&ext4_module);
     }

@@ -31,6 +31,7 @@
 #include "allocate.h"
 #include "contents.h"
 #include "uuid.h"
+#include "backed_block.h"
 
 #ifdef ANDROID
 #include <private/android_filesystem_config.h>

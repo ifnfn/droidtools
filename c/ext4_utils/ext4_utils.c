@@ -119,7 +119,7 @@ void ext4_create_fs_aux_info()
 		info.blocks_per_group);
 	aux_info.blocks_per_ind = info.block_size / sizeof(u32);
 	aux_info.blocks_per_dind = aux_info.blocks_per_ind * aux_info.blocks_per_ind;
-	aux_info.blocks_per_tind = aux_info.blocks_per_dind * aux_info.blocks_per_dind;
+	aux_info.blocks_per_tind = aux_info.blocks_per_ind * aux_info.blocks_per_ind * aux_info.blocks_per_ind;
 
 	aux_info.bg_desc_blocks =
 		DIV_ROUND_UP(aux_info.groups * sizeof(struct ext2_group_desc),
@@ -303,9 +303,16 @@ void ext4_create_journal_inode()
 		return;
 	}
 
-	u8 *journal_data = inode_allocate_data_extents(inode,
+	u8 *journal_data = NULL;
+	if (info.feat_incompat & EXT4_FEATURE_INCOMPAT_EXTENTS) {
+		journal_data = inode_allocate_data_extents(inode,
 			info.journal_blocks * info.block_size,
 			info.journal_blocks * info.block_size);
+	} else {
+		journal_data = inode_allocate_data_indirect(inode,
+			info.journal_blocks * info.block_size,
+			info.journal_blocks * info.block_size);
+	}
 	if (!journal_data) {
 		error("failed to allocate extents for journal data");
 		return;

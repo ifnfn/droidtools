@@ -254,11 +254,6 @@ static int inode_attach_dindirect_blocks(struct ext4_inode *inode,
 
 	fill_dindirect_block(dind_block_data, len, alloc);
 
-	if (advance_blocks(alloc, len)) {
-		error("failed to advance %d blocks", len);
-		return -1;
-	}
-
 	*block_len -= len;
 	return 0;
 }
@@ -284,11 +279,6 @@ static int inode_attach_tindirect_blocks(struct ext4_inode *inode,
 	queue_data_block((u8*)tind_block_data, info.block_size, tind_block);
 
 	fill_tindirect_block(tind_block_data, len, alloc);
-
-	if (advance_blocks(alloc, len)) {
-		error("failed to advance %d blocks", len);
-		return -1;
-	}
 
 	*block_len -= len;
 	return 0;

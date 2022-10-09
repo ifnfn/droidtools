@@ -621,6 +621,7 @@ static int advance_list_ptr(struct region_list *list, int blocks)
 		blocks -= (reg->len - list->partial_iter);
 		list->partial_iter = 0;
 		reg = reg->next;
+		list->iter = reg;
 	}
 
 	if (blocks > 0)

@@ -92,6 +92,7 @@ u32 make_directory(u32 dir_inode_num, u32 entries, struct dentry *dentries,
 
 	blocks = DIV_ROUND_UP(dentry_size(entries, dentries), info.block_size);
 	len = blocks * info.block_size;
+	//printf("QQQ make_directory blocks=%d\n", blocks);
 
 	if (dir_inode_num) {
 		inode_num = allocate_inode(info);
@@ -113,9 +114,13 @@ u32 make_directory(u32 dir_inode_num, u32 entries, struct dentry *dentries,
 		return EXT4_ALLOCATE_FAILED;
 	}
 
-	data = inode_allocate_data_extents(inode, len, len);
+	if (info.feat_incompat & EXT4_FEATURE_INCOMPAT_EXTENTS) {
+		data = inode_allocate_data_extents(inode, len, len);
+	} else {
+		data = inode_allocate_data_indirect(inode, len, len);
+	}
 	if (data == NULL) {
-		error("failed to allocate %llu extents", len);
+		error("failed to allocate %u", len);
 		return EXT4_ALLOCATE_FAILED;
 	}
 
@@ -177,8 +182,13 @@ u32 make_file(const char *filename, u64 len)
 		return EXT4_ALLOCATE_FAILED;
 	}
 
-	if (len > 0)
-		inode_allocate_file_extents(inode, len, filename);
+	if (len > 0) {
+		if (info.feat_incompat & EXT4_FEATURE_INCOMPAT_EXTENTS) {
+			inode_allocate_file_extents(inode, len, filename);
+		} else {
+			inode_allocate_file_indirect(inode, len, filename);
+		}
+	}
 
 	inode->i_mode = S_IFREG;
 	inode->i_links_count = 1;

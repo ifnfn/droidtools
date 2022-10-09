@@ -29,8 +29,8 @@
 static u8 *create_backing(struct block_allocation *alloc,
 		unsigned long backing_len)
 {
-	if (DIV_ROUND_UP(backing_len, info.block_size) > EXT4_NDIR_BLOCKS)
-		critical_error("indirect backing larger than %d blocks", EXT4_NDIR_BLOCKS);
+	//if (DIV_ROUND_UP(backing_len, info.block_size) > EXT4_NDIR_BLOCKS)
+	//	critical_error("indirect backing larger than %d blocks", EXT4_NDIR_BLOCKS);
 
 	u8 *data = calloc(backing_len, 1);
 	if (!data)
@@ -42,7 +42,7 @@ static u8 *create_backing(struct block_allocation *alloc,
 		u32 region_len;
 		u32 len;
 		get_region(alloc, &region_block, &region_len);
-
+		//printf("QQQ indirect create_backing region_block=%u, reglen=%u\n", region_block, region_len);
 		len = min(region_len * info.block_size, backing_len);
 
 		queue_data_block(ptr, len, region_block);
@@ -51,6 +51,26 @@ static u8 *create_backing(struct block_allocation *alloc,
 	}
 
 	return data;
+}
+
+/* Queues each chunk of a file to be written to contiguous data block
+   regions */
+static void create_backing_file(struct block_allocation *alloc,
+	unsigned long backing_len, const char *filename)
+{
+	off_t offset = 0;
+	for (; alloc != NULL && backing_len > 0; get_next_region(alloc)) {
+		u32 region_block;
+		u32 region_len;
+		u32 len;
+		get_region(alloc, &region_block, &region_len);
+
+		len = min(region_len * info.block_size, backing_len);
+
+		queue_data_file(filename, offset, len, region_block);
+		offset += len;
+		backing_len -= len;
+	}
 }
 
 static void reserve_indirect_block(struct block_allocation *alloc, int len)
@@ -381,31 +401,17 @@ static int do_inode_attach_indirect(struct ext4_inode *inode,
 }
 
 static struct block_allocation *do_inode_allocate_indirect(
-		struct ext4_inode *inode, u32 block_len)
+		struct ext4_inode *inode, u32 len)
 {
+	u32 block_len = DIV_ROUND_UP(len, info.block_size);
 	u32 indirect_len = indirect_blocks_needed(block_len);
+	//printf("QQQ do_inode_allocate_indirect block_len=%d, ind_len=%d\n", block_len, indirect_len);
 
 	struct block_allocation *alloc = allocate_blocks(block_len + indirect_len);
 
 	if (alloc == NULL) {
 		error("Failed to allocate %d blocks", block_len + indirect_len);
 		return NULL;
-	}
-
-	return alloc;
-}
-
-/* Allocates enough blocks to hold len bytes and connects them to an inode */
-void inode_allocate_indirect(struct ext4_inode *inode, unsigned long len)
-{
-	struct block_allocation *alloc;
-	u32 block_len = DIV_ROUND_UP(len, info.block_size);
-	u32 indirect_len = indirect_blocks_needed(block_len);
-
-	alloc = do_inode_allocate_indirect(inode, block_len);
-	if (alloc == NULL) {
-		error("failed to allocate extents for %lu bytes", len);
-		return;
 	}
 
 	reserve_all_indirect_blocks(alloc, block_len);
@@ -417,6 +423,20 @@ void inode_allocate_indirect(struct ext4_inode *inode, unsigned long len)
 	inode->i_flags = 0;
 	inode->i_blocks_lo = (block_len + indirect_len) * info.block_size / 512;
 	inode->i_size_lo = len;
+
+	return alloc;
+}
+
+/* Allocates enough blocks to hold len bytes and connects them to an inode */
+void inode_allocate_indirect(struct ext4_inode *inode, unsigned long len)
+{
+	struct block_allocation *alloc;
+
+	alloc = do_inode_allocate_indirect(inode, len);
+	if (alloc == NULL) {
+		error("failed to allocate extents for %lu bytes", len);
+		return;
+	}
 
 	free_alloc(alloc);
 }
@@ -502,3 +522,20 @@ u8 *inode_allocate_data_indirect(struct ext4_inode *inode, unsigned long len,
 
 	return data;
 }
+
+void inode_allocate_file_indirect(struct ext4_inode *inode, unsigned long len,
+		const char *filename)
+{
+	struct block_allocation *alloc;
+
+	alloc = do_inode_allocate_indirect(inode, len);
+	if (alloc == NULL) {
+		error("failed to allocate extents for %lu bytes", len);
+		return;
+	}
+
+	create_backing_file(alloc, len, filename);
+
+	free_alloc(alloc);
+}
+

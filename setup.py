@@ -16,7 +16,7 @@ module_ext4 = Extension('droidtools.ext4fs',
 setup(
     name='python-ext4fs',
     packages= find_packages(),
-    version="0.1a15",
+    version="0.1a16",
     license='GPLv3 License',
     author='Tarek Galal',
     ext_modules = [module_ext4],

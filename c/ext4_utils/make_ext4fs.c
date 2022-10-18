@@ -228,11 +228,11 @@ void reset_ext4fs_info() {
 }
 
 int make_ext4fs(const char *filename, const char *directory,
-                char *mountpoint, int android, int gzip, int sparse)
+                char *mountpoint, int android, int gzip, int sparse, int extent)
 {
         u32 root_inode_num;
         u16 root_mode;
-	//printf("QQQ make_ext4fs %s, %s, %s, %d, %d, %d\n", filename, directory, mountpoint, android, gzip, sparse);
+	//printf("QQQ make_ext4fs %s, %s, %s, %d, %d, %d, %d\n", filename, directory, mountpoint, android, gzip, sparse, extent);
 	if (info.len == 0)
 		info.len = get_file_size(filename);
 
@@ -274,9 +274,10 @@ int make_ext4fs(const char *filename, const char *directory,
 			EXT4_FEATURE_RO_COMPAT_LARGE_FILE;
 
 	info.feat_incompat |=
-			//EXT4_FEATURE_INCOMPAT_EXTENTS |
 			EXT4_FEATURE_INCOMPAT_FILETYPE;
-
+    if (extent) {
+        info.feat_incompat |= EXT4_FEATURE_INCOMPAT_EXTENTS;
+    }
 
 	printf("Creating filesystem with parameters:\n");
 	printf("    Size: %llu\n", info.len);

@@ -4,8 +4,8 @@ MODE_NORMAL = 0
 MODE_SPARSED = 1
 MODE_GZIP = 2
 
-def make_ext4fs(filename, directory, length, mountPoint = None, mode = MODE_NORMAL):
-    return ext4fs.make_ext4fs(filename, directory, mountPoint or "", str(int(length)), mode)
+def make_ext4fs(filename, directory, length, mountPoint = None, mode = MODE_NORMAL, extent = 0):
+    return ext4fs.make_ext4fs(filename, directory, mountPoint or "", str(int(length)), mode, extent)
 
 
 if __name__ == "__main__":

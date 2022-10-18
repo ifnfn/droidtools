@@ -32,14 +32,13 @@ makeExt4Fs(PyObject *self, PyObject *args)
     const char *mountpoint;
     const char *len;
 
-    Py_ssize_t filenamelen, directorylen, mountpointlen, lenlen, mode;
+    Py_ssize_t filenamelen, directorylen, mountpointlen, lenlen, mode, extent;
 
 
-
-    if (!PyArg_ParseTuple(args, y"#"y"#"y"#"y"#i:generate",&filename, &filenamelen, &directory, &directorylen, &mountpoint, &mountpointlen, &len, &lenlen, &mode)) {
+    if (!PyArg_ParseTuple(args, y"#"y"#"y"#"y"#ii:generate",&filename, &filenamelen, &directory, &directorylen, &mountpoint, &mountpointlen, &len, &lenlen, &mode, &extent)) {
         return NULL;
     }
-    printf("filename: %s, dir: %s, mountpoint: %s, len: %s, mode: %i\n", filename, directory, mountpoint, len, mode);
+    printf("filename: %s, dir: %s, mountpoint: %s, len: %s, mode: %i, extent: %i\n", filename, directory, mountpoint, len, mode, extent);
 
     reset_ext4fs_info();
     info.len = parse_num(len);
@@ -51,7 +50,7 @@ makeExt4Fs(PyObject *self, PyObject *args)
 
 
     printf("ANDROID: %i, GZIP: %i, SPARSED: %i", android, gzip, sparse);
-    make_ext4fs(filename, directory, mountpoint, android, gzip, sparse);
+    make_ext4fs(filename, directory, mountpoint, android, gzip, sparse, extent);
 
     return Py_BuildValue("i", 1);
 

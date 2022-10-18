@@ -232,7 +232,7 @@ int make_ext4fs(const char *filename, const char *directory,
 {
         u32 root_inode_num;
         u16 root_mode;
-
+	//printf("QQQ make_ext4fs %s, %s, %s, %d, %d, %d\n", filename, directory, mountpoint, android, gzip, sparse);
 	if (info.len == 0)
 		info.len = get_file_size(filename);
 
@@ -274,7 +274,7 @@ int make_ext4fs(const char *filename, const char *directory,
 			EXT4_FEATURE_RO_COMPAT_LARGE_FILE;
 
 	info.feat_incompat |=
-			EXT4_FEATURE_INCOMPAT_EXTENTS |
+			//EXT4_FEATURE_INCOMPAT_EXTENTS |
 			EXT4_FEATURE_INCOMPAT_FILETYPE;
 
 

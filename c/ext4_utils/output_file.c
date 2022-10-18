@@ -375,7 +375,7 @@ void write_data_block(struct output_file *out, u64 off, u8 *data, int len)
 		ret = out->ops->seek(out, off);
 		if (ret < 0)
 			return;
-
+		//printf("QQQ write_data_block off=%llu data:%x %x %x len=%d\n", off, data[0], data[1], data[2], len);
 		ret = out->ops->write(out, data, len);
 		if (ret < 0)
 			return;

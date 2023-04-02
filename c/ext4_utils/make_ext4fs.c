@@ -279,20 +279,20 @@ int make_ext4fs(const char *filename, const char *directory,
         info.feat_incompat |= EXT4_FEATURE_INCOMPAT_EXTENTS;
     }
 
-	printf("Creating filesystem with parameters:\n");
-	printf("    Size: %llu\n", info.len);
-	printf("    Block size: %d\n", info.block_size);
-	printf("    Blocks per group: %d\n", info.blocks_per_group);
-	printf("    Inodes per group: %d\n", info.inodes_per_group);
-	printf("    Inode size: %d\n", info.inode_size);
-	printf("    Journal blocks: %d\n", info.journal_blocks);
-	printf("    Label: %s\n", info.label);
+	fprintf(stderr, "Creating filesystem with parameters:\n");
+	fprintf(stderr, "    Size: %llu\n", info.len);
+	fprintf(stderr, "    Block size: %d\n", info.block_size);
+	fprintf(stderr, "    Blocks per group: %d\n", info.blocks_per_group);
+	fprintf(stderr, "    Inodes per group: %d\n", info.inodes_per_group);
+	fprintf(stderr, "    Inode size: %d\n", info.inode_size);
+	fprintf(stderr, "    Journal blocks: %d\n", info.journal_blocks);
+	fprintf(stderr, "    Label: %s\n", info.label);
 
 	ext4_create_fs_aux_info();
 
-	printf("    Blocks: %llu\n", aux_info.len_blocks);
-	printf("    Block groups: %d\n", aux_info.groups);
-	printf("    Reserved block group size: %d\n", aux_info.bg_desc_reserve_blocks);
+	fprintf(stderr, "    Blocks: %llu\n", aux_info.len_blocks);
+	fprintf(stderr, "    Block groups: %d\n", aux_info.groups);
+	fprintf(stderr, "    Reserved block group size: %d\n", aux_info.bg_desc_reserve_blocks);
 
 	block_allocator_init();
 
@@ -317,7 +317,7 @@ int make_ext4fs(const char *filename, const char *directory,
 
 	ext4_update_free();
 
-	printf("Created filesystem with %d/%d inodes and %d/%d blocks\n",
+	fprintf(stderr, "Created filesystem with %d/%d inodes and %d/%d blocks\n",
 			aux_info.sb->s_inodes_count - aux_info.sb->s_free_inodes_count,
 			aux_info.sb->s_inodes_count,
 			aux_info.sb->s_blocks_count_lo - aux_info.sb->s_free_blocks_count_lo,
